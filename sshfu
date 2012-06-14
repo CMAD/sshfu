@@ -1,5 +1,5 @@
 #!/bin/sh
-#version="0.1beta" 
+#version="0.1.1beta" 
 
 mkdir -p ~/.ssh/sshfu
 cd ~/.ssh/sshfu
@@ -18,7 +18,7 @@ cat <<EOF > routes
 #
 #host server addres server.dns.test user root port 8
 #host laptop address 192.168.2.1 gw server user foo
-#host myvm address 10.10.1.1 gw laptop
+#host myvm address 10.10.1.1 gw laptop key id_rsa2
 #
 # have fun (and don't make any mistakes unless you 
 # want to blow you head)
@@ -33,6 +33,7 @@ cat routes | sed -E -e "s/([^ ]+) ([^ ]+)/\1(\2)/g" -e "/^#/d" | m4 \
 ' -D gw='ProxyCommand nc $1 %h %p
 ' -D user='User $1
 ' -D port='Port $1
+' -D key='IdentityFile ~/.ssh/$1
 ' >> ssh_config
 cat ssh_config.tail >> ssh_config
 }
