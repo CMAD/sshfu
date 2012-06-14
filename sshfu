@@ -1,5 +1,5 @@
-#!/bin/sh
-#version="0.1.1beta" 
+#!/bin/bash
+#version="0.1.2beta" 
 
 mkdir -p ~/.ssh/sshfu
 cd ~/.ssh/sshfu
