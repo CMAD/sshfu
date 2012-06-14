@@ -1,0 +1,9 @@
+Very very basic syntax highliting.
+
+Install:
+mkdir -p ~/vim/syntax
+cp sshfu.vim ~/.vim/syntax
+
+echo "au BufNewFile,BufRead ~/.ssh/sshfu/routes set filetype=sshfu" \
+  >> ˜/.vimrc
+
