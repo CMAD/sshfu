@@ -1,6 +1,11 @@
 #!/bin/bash
 #version="0.1.2beta" 
 
+which m4 >> /dev/null || {
+  echo You need m4 installed to run sshfu
+  exit 1
+}
+
 mkdir -p ~/.ssh/sshfu
 cd ~/.ssh/sshfu
 touch ssh_config.{head,tail}
