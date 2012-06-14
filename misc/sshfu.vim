@@ -12,6 +12,7 @@ syn keyword sshfuKeyword host
 syn keyword sshfuKeyword address
 syn keyword sshfuKeyword gw
 syn keyword sshfuKeyword user
+syn keyword sshfuKeyword port
 syn keyword sshfuKeyword key
 
 syn match sshfuComment "^#.*$" contains=sshfuTodo
