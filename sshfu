@@ -32,7 +32,7 @@ fi
 
 comp_ssh_config() {
 cat ssh_config.head > ssh_config
-cat routes | sed -E -e "s/([^ ]+) ([^ ]+)/\1(\2)/g" -e "/^#/d" | m4 \
+cat routes | sed -E -e "s/([^ ]+) ([^ ]+)/\1(\2)/g" -e "/^#/d" -e "/^$/d" | m4 \
   -D host='Host $1
 ' -D address='HostName $1
 ' -D gw='ProxyCommand nc $1 %h %p
