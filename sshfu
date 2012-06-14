@@ -1,5 +1,44 @@
-#!/bin/bash
+#!/bin/sh
+#version="0.1beta" 
 
-mv ~/.ssh/config{,~}
-xargs ./hm -n 1
+mkdir -p ~/.ssh/sshfu
+cd ~/.ssh/sshfu
+touch ssh_config.{head,tail}
 
+if [ ! -e routes ]; then
+cat <<EOF > routes
+#sshfu ssh routes
+#this file along with the contents of ssh_config.head and
+#ssh_config.tail are compiled into you ~/ssh/config
+#
+#this is a litte less verbose syntax for managing hosts
+#than raw ssh_config is.
+#
+#examples:
+#
+#host server addres server.dns.test user root port 8
+#host laptop address 192.168.2.1 gw server user foo
+#host myvm address 10.10.1.1 gw laptop
+#
+# have fun (and don't make any mistakes unless you 
+# want to blow you head)
+EOF
+fi
+
+comp_ssh_config() {
+cat ssh_config.head > ssh_config
+cat routes | sed -E -e "s/([^ ]+) ([^ ]+)/\1(\2)/g" -e "/^#/d" | m4 \
+  -D host='Host $1
+' -D address='HostName $1
+' -D gw='ProxyCommand nc $1 %h %p
+' -D user='User $1
+' -D port='Port $1
+' >> ssh_config
+cat ssh_config.tail >> ssh_config
+}
+
+"${EDITOR-vi}" routes
+
+comp_ssh_config
+cp ../config{,~}
+cp ssh_config ../config

@@ -1,11 +1,26 @@
 sshfu: ssh config manager
+-------------------------
 
 This is an early early POC, both as in proof of concept, and
 as in piece of crap. Be foolish at you own peril.
 
-Example syntax:
+You can manage you ˜/.ssh/config through ˜/.ssh/sshfu/routes
+
+When you run sshfu, it will open $EDITOR on ˜/.ssh/sshfu/routes
+and fire up the compilation when you quit.
+
+This program uses the highly advanced garbage-in garbage-out
+error protection mechanism.
+
+ssh_config.tail and ssh_config.head will be appendend at
+the obvious places of the generated configuration.
+
+The point of this is to have a slightly shorter syntax
+so you can have a better picture of what you are doing.
+
+Example:
 host server address server.test user root
-host grimalkin address 192.168.1.1 gw server user cma
+host grimalkin address 192.168.1.1 gw server user cmad
 host vm1 address 10.10.1.1 gw grimalkin
 
 -------------------------------------------------------------------------------
