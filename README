@@ -1,0 +1,27 @@
+sshfu: ssh config manager
+
+This is an early early POC, both as in proof of concept, and
+as in piece of crap. Be foolish at you own peril.
+
+Example syntax:
+host server address server.test user root
+host grimalkin address 192.168.1.1 gw server user cma
+host vm1 address 10.10.1.1 gw grimalkin
+
+-------------------------------------------------------------------------------
+Copyright (C) 2012 Carlos Antelo
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-------------------------------------------------------------------------------

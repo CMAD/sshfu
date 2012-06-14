@@ -1,0 +1,22 @@
+#!/bin/sh
+#version="0.1alpha" 
+
+if [ $[ $# % 2 ] -ne 0  ] || [ $# = 0 ]; then
+  echo 'Usage: hm host HOST [address ADDRESS] [gw GW] [user USER]'
+  exit 1
+fi
+
+if [ ! -d ~/.ssh ]; then
+  mkdir ~/.ssh
+fi
+
+# a b => a(b) => c
+#e.g: address 192.168.0.1 -> address(192.168.0.1) -> HostName 192.168.0.1
+echo "$@" | sed -E "s/([^ ]+) ([^ ]+)/\1(\2)/g" | m4 \
+  -D host='Host $1
+' -D address='HostName $1
+' -D gw='ProxyCommand nc $1 %h %p
+' -D user='User $1
+
+' #>> ~/.ssh/config
+

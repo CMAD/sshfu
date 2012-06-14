@@ -1,0 +1,5 @@
+#!/bin/bash
+
+mv ~/.ssh/config{,~}
+xargs ./hm -n 1
+
