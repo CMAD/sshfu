@@ -1,5 +1,5 @@
 #!/bin/sh
-#version="0.1.2beta" 
+#version="0.1.3beta" 
 
 if ! which m4 >> /dev/null; then 
   echo You need m4 installed to run sshfu
