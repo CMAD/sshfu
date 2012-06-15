@@ -1,10 +1,10 @@
 #!/bin/bash
 #version="0.1.2beta" 
 
-which m4 >> /dev/null || {
+if ! which m4 >> /dev/null; then 
   echo You need m4 installed to run sshfu
   exit 1
-}
+fi
 
 mkdir -p ~/.ssh/sshfu
 cd ~/.ssh/sshfu
