@@ -18,7 +18,7 @@ syn keyword sshfuKeyword keepalive
 syn keyword sshfuKeyword i
 syn keyword sshfuKeyword comp
 syn keyword sshfuKeyword level
-syn keyword sshfuKeyword fagent
+syn keyword sshfuKeyword agent
 syn keyword sshfuKeyword proxy
 
 syn match sshfuComment "^#.*$" contains=sshfuTodo

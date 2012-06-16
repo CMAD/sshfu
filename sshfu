@@ -76,7 +76,7 @@ host $1 dnl' \
   -D SSHKey='key $1 dnl' \
   -D Compression='comp $1 dnl' \
   -D CompressionLevel='level $1 dnl' \
-  -D ForwardAgent='fagent $1 dnl' \
+  -D ForwardAgent='agent $1 dnl' \
   -D Proxy='proxy $1 dnl' \
   -D IdentityFile='i $1 dnl' | sed '/^$/d;s/ \{2,\}/ /g;s/^[^ ]\{1,\}([^ ]*).*/&\
 /'
@@ -91,7 +91,7 @@ cat <<EOF > routes
 # ssh_config.tail are compiled into you ~/ssh/config
 #
 # supported keywords: host, address, gw, user, port, key, i, keepalive,
-# comp, clevel, fagent, proxy
+# comp, level, agent, proxy
 #
 # host server address server.dns.test port 8
 # host laptop address 192.168.2.1 gw server key id_rsa2
@@ -124,7 +124,7 @@ cat routes | sed 's/\([^() ]\{1,\}\) \([^() ]\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d'| m
 ' -D i='IdentityFile $1
 ' -D comp='Compression $1
 ' -D level='CompressionLevel $1
-' -D fagent='ForwardAgent $1
+' -D agent='ForwardAgent $1
 ' -D keepalive='ServerAliveInterval $1
 ' -D proxy='ProxyCommand $1 %h %p
 ' | sed 's/)/&\
