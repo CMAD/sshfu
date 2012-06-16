@@ -101,6 +101,7 @@ EOF
 
   if [ -e ~/.ssh/config ]; then
     import_ssh_confg >> ~/.ssh/sshfu/routes 
+    echo >> ~/.ssh/sshfu/routes
   fi
 
 fi
