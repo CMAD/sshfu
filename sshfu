@@ -1,15 +1,66 @@
 #!/bin/sh
-#version="0.1.3beta" 
+#version="0.2beta" 
 
 if ! which m4 >> /dev/null; then 
   echo You need m4 installed to run sshfu
   exit 1
 fi
 
-mkdir -p ~/.ssh/sshfu
+autoinstall(){
+echo "running autoinstall..." >&2
+
+echo "trying to copy the script to /usr/local/bin using normal cp" >&2
+cp "$0" /usr/local/bin/sshfu 
+
+if [ "$?" -ne 0 ]; then
+  echo "it didn't work, trying to use sudo..." >&2 
+  sudo cp "$0" /usr/local/bin/sshfu && echo ... ok. >&2 && return 0
+else
+  echo ... ok. >&2
+  return 0
+fi
+
+echo "didn't work either, trying su" >&2
+local origin=$PWD
+su - root -c "cp $origin/$0 /usr/local/bin/sshfu" 
+
+if [ "$?" -ne 0 ]; then
+  echo "didn't work, plase install manually." >&2
+  exit 1
+fi
+
+echo ... ok. >&2
+}
+
+vimsyntax() {
+mkdir -p ~/.vim/syntax
+cp ./misc/sshfu.vim ~/.vim/syntax
+cat <<EOF >> ~/.vimrc
+
+" sshfu syntax highliting (autoinstalled)
+au BufNewFile,BufRead ~/.ssh/sshfu/routes set filetype=sshfu
+
+EOF
+}
+
+if [ ! -d ~/.ssh/sshfu ]; then
+
+  if ! which sshfu; then
+    autoinstall
+  fi
+
+  if [ -e ./misc/sshfu.vim ] && [ ! -e ~/.vim/syntax/sshfu.vim ]; then
+    vimsyntax
+  fi
+
+  cp ~/.ssh/config ~/.ssh/original_ssh_config 2>&1 > /dev/null
+  mkdir -p ~/.ssh/sshfu
+  touch ~/.ssh/sshfu/ssh_config.head
+  touch ~/.ssh/sshfu/ssh_config.tail
+
+fi
+
 cd ~/.ssh/sshfu
-touch ssh_config.head
-touch ssh_config.tail
 
 if [ ! -e routes ]; then
 cat <<EOF > routes
@@ -36,10 +87,11 @@ cat ssh_config.head > ssh_config
 cat routes | sed 's/\([^ ]\{1,\}\) \([^ ]\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d'| m4 \
   -D host='Host $1
 ' -D address='HostName $1
-' -D gw='ProxyCommand nc $1 %h %p
+' -D gw='ProxyCommand ssh $1 -W %h:%p
 ' -D user='User $1
 ' -D port='Port $1
 ' -D key='IdentityFile ~/.ssh/$1
+' -D keepalive='ServerAliveInterval $1
 ' >> ssh_config
 cat ssh_config.tail >> ssh_config
 }
