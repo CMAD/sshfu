@@ -83,6 +83,7 @@ EOF
 fi
 
 comp_ssh_config() {
+umask 022
 cat ssh_config.head > ssh_config
 cat routes | sed 's/\([^ ]\{1,\}\) \([^ ]\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d'| m4 \
   -D host='Host $1
