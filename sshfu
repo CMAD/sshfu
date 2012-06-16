@@ -36,10 +36,8 @@ vimsyntax() {
 mkdir -p ~/.vim/syntax
 cp ./misc/sshfu.vim ~/.vim/syntax
 cat <<EOF >> ~/.vimrc
-
 " sshfu syntax highliting (autoinstalled)
 au BufNewFile,BufRead ~/.ssh/sshfu/routes set filetype=sshfu
-
 EOF
 }
 
@@ -65,6 +63,7 @@ cd ~/.ssh/sshfu
 import_ssh_confg() {
 sed < ~/.ssh/config \
   -e 's/ProxyCommand ssh \([^ ]\{1,\}\).*/Gateway \1/' \
+  -e 's/ProxyCommand \([^ ]\{1,\}\).*/Proxy \1/' \
   -e 's@IdentityFile ~/.ssh/@SSHKey@' \
   -e 's/\([^ ]\{1,\}\) \(.\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d' | m4 \
   -D Host='
@@ -75,8 +74,13 @@ host $1 dnl' \
   -D User='user $1 dnl' \
   -D Port='port $1 dnl' \
   -D SSHKey='key $1 dnl' \
-  -D IdentityFile='i $1 dnl' | sed '/^$/d;s/  / /g' | grep "^host"
- }
+  -D Compression='comp $1 dnl' \
+  -D CompressionLevel='level $1 dnl' \
+  -D ForwardAgent='fagent $1 dnl' \
+  -D Proxy='proxy $1 dnl' \
+  -D IdentityFile='i $1 dnl' | sed '/^$/d;s/ \{2,\}/ /g;s/^[^ ]\{1,\}([^ ]*).*/&\
+/'
+}
 
 
 if [ ! -e routes ]; then
@@ -86,7 +90,8 @@ cat <<EOF > routes
 # This file along with the contents of ssh_config.head and
 # ssh_config.tail are compiled into you ~/ssh/config
 #
-# supported keywords: host, address, gw, user, port, key, i, keepalive
+# supported keywords: host, address, gw, user, port, key, i, keepalive,
+# comp, clevel, fagent, proxy
 #
 # host server address server.dns.test port 8
 # host laptop address 192.168.2.1 gw server key id_rsa2
@@ -109,7 +114,7 @@ fi
 comp_ssh_config() {
 umask 022
 cat ssh_config.head > ssh_config
-cat routes | sed 's/\([^ ]\{1,\}\) \([^ ]\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d'| m4 \
+cat routes | sed 's/\([^() ]\{1,\}\) \([^() ]\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d'| m4 \
   -D host='Host $1
 ' -D address='HostName $1
 ' -D gw='ProxyCommand ssh $1 -W %h:%p
@@ -117,8 +122,13 @@ cat routes | sed 's/\([^ ]\{1,\}\) \([^ ]\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d'| m4 \
 ' -D port='Port $1
 ' -D key='IdentityFile ~/.ssh/$1
 ' -D i='IdentityFile $1
+' -D comp='Compression $1
+' -D level='CompressionLevel $1
+' -D fagent='ForwardAgent $1
 ' -D keepalive='ServerAliveInterval $1
-' >> ssh_config
+' -D proxy='ProxyCommand $1 %h %p
+' | sed 's/)/&\
+/;s@\([^ ]\{1,\}\)(\([^ ]\{1,\}\))@\1 \2@g;s/ \{2,\}/ /g' | sed 's/^ /  /' >> ssh_config
 cat ssh_config.tail >> ssh_config
 }
 
