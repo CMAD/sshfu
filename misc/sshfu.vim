@@ -15,6 +15,8 @@ syn keyword sshfuKeyword user
 syn keyword sshfuKeyword port
 syn keyword sshfuKeyword key
 syn keyword sshfuKeyword keepalive
+syn keyword sshfuKeyword i
+
 
 syn match sshfuComment "^#.*$" contains=sshfuTodo
 syn keyword sshfuTodo TODO FIXME contained

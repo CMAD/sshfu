@@ -62,24 +62,47 @@ fi
 
 cd ~/.ssh/sshfu
 
+import_ssh_confg() {
+sed < ~/.ssh/config \
+  -e 's/ProxyCommand ssh \([^ ]\{1,\}\).*/Gateway \1/' \
+  -e 's@IdentityFile ~/.ssh/@SSHKey@' \
+  -e 's/\([^ ]\{1,\}\) \(.\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d' | m4 \
+  -D Host='
+host $1 dnl' \
+  -D HostName='address $1 dnl' \
+  -D Gateway='gw $1 dnl' \
+  -D ServerKeepAlive='keepalive $1 dnl' \
+  -D User='user $1 dnl' \
+  -D Port='port $1 dnl' \
+  -D SSHKey='key $1 dnl' \
+  -D IdentityFile='i $1 dnl' | sed '/^$/d;s/  / /g' | grep "^host"
+ }
+
+
 if [ ! -e routes ]; then
 cat <<EOF > routes
-#sshfu ssh routes
-#this file along with the contents of ssh_config.head and
-#ssh_config.tail are compiled into you ~/ssh/config
+# sshfu configuration file
 #
-#this is a litte less verbose syntax for managing hosts
-#than raw ssh_config is.
+# This file along with the contents of ssh_config.head and
+# ssh_config.tail are compiled into you ~/ssh/config
 #
-#examples:
+# supported keywords: host, address, gw, user, port, key, i, keepalive
 #
-#host server addres server.dns.test user root port 8
-#host laptop address 192.168.2.1 gw server user foo
-#host myvm address 10.10.1.1 gw laptop key id_rsa2
+# host server address server.dns.test port 8
+# host laptop address 192.168.2.1 gw server key id_rsa2
+# host myvm address 10.10.1.1 gw laptop i ~/Documents/keys/myvm
+# host * user root keepalive 60 
 #
 # have fun (and don't make any mistakes unless you 
 # want to blow you head)
+# 
+
 EOF
+
+  if [ -e ~/.ssh/config ]; then
+    import_ssh_confg >> ~/.ssh/sshfu/routes 
+  fi
+
 fi
 
 comp_ssh_config() {
@@ -92,6 +115,7 @@ cat routes | sed 's/\([^ ]\{1,\}\) \([^ ]\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d'| m4 \
 ' -D user='User $1
 ' -D port='Port $1
 ' -D key='IdentityFile ~/.ssh/$1
+' -D i='IdentityFile $1
 ' -D keepalive='ServerAliveInterval $1
 ' >> ssh_config
 cat ssh_config.tail >> ssh_config
