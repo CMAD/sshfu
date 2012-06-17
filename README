@@ -1,42 +1,39 @@
-sshfu: ssh config manager
--------------------------
+sshfu: ~/.ssh/config manager.
 
-This is an early early POC, both as in proof of concept, and
-as in piece of crap. Be foolish at you own peril.
+This script provides an alternative line-by-line syntax
+for ~/.ssh/config that is a little easier on the eyes.
 
-You can manage you ˜/.ssh/config through ˜/.ssh/sshfu/routes
+When you have more than two hosts on you configuration it
+get's a litte verbose for simple things, and here is where
+this syntax helps.
 
-When you run sshfu, it will open $EDITOR on ˜/.ssh/sshfu/routes
-and fire up the compilation when you quit.
+sshfu will fire $EDITOR on ~/.ssh/sshfu/routes and when
+you exit, compile the resulting configuration along with
+~/.ssh/sshfu/ssh_config.head and ~/.ssh/sshfu/ssh_config.tail 
+into you actual ~/.ssh/config.
 
-This program uses the highly advanced garbage-in garbage-out
-error protection mechanism.
+To make things easier, the first time you run it, it will
+try to copy itself to /usr/local/bin to be on you path.
 
-ssh_config.tail and ssh_config.head will be appendend at
-the obvious places of the generated configuration.
+Also, if you are running it from the uncompressed archive
+it will install a vim syntax highliting file, and set it up.
 
-The point of this is to have a slightly shorter syntax
-so you can have a better picture of what you are doing.
+If an allready existing ~/.ssh/config exits, it will make a
+copy on ~/.ssh/original_ssh_config, and try to import you
+configuration.
 
-Example:
+It has no options, the only thing you need to do to use it
+is fire sshfu. There are commented examples on the 
+configuration file that will show up when you run it.
+
+here is what the syntax looks like:
+
 host server address server.test user root
 host grimalkin address 192.168.1.1 gw server user cmad
 host vm1 address 10.10.1.1 gw grimalkin
 
--------------------------------------------------------------------------------
-Copyright (C) 2012 Carlos Antelo
+It shouldn't do any harm to say but, this script is 
+garbage-in garbage-out, which means, if yo put a typo
+in the sshfu config file, expect one in your ~/.ssh/config
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
--------------------------------------------------------------------------------
