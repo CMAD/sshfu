@@ -4,7 +4,7 @@ This script provides an alternative line-by-line syntax for ~/.ssh/config that i
 
 When you have more than two hosts on you configuration it gets a little verbose for simple things, and here is where this syntax helps.
 
-Here is what the syntax looks like:
+This is what the syntax looks like:
 
 host server address server.test user root
 host grimalkin address 192.168.1.1 gw server user cmad
@@ -24,15 +24,15 @@ Host vm1
   HostName 10.10.1.1
   ProxyCommand ssh grimalkin -W %h:%p
 
-If it finds an already existing ~/.ssh/config, it will make a copy on ~/.ssh/original_ssh_config, and try to import you configuration.
+If it finds an already existing ~/.ssh/config, it will make a copy on ~/.ssh/original_ssh_config, and try to import your configuration.
 
-Also to make things easier, the first time you run it, it will try to copy itself to /usr/local/bin to be on you path.
+Also to make things easier, the first time you run it, it will try to copy itself to /usr/local/bin to be on your path.
 
 And if you are running it from the uncompressed archive it will install a vim syntax highlighting file, and set it up.
 
 It has no options, the only thing you need to do to use it is to fire it, $ sshfu. There are commented examples on the configuration file that will show up when you run it.
 
-sshfu will fire $EDITOR on ~/.ssh/sshfu/routes and when you exit, compile the resulting configuration along with ~/.ssh/sshfu/ssh_config.head and ~/.ssh/sshfu/ssh_config.tail into you actual ~/.ssh/config.
+sshfu will fire $EDITOR on ~/.ssh/sshfu/routes and when you exit, compile the resulting configuration along with ~/.ssh/sshfu/ssh_config.head and ~/.ssh/sshfu/ssh_config.tail into your actual ~/.ssh/config.
 
 It shouldn't do any harm to say but, this script is garbage-in garbage-out, which means, if yo put a typo in the sshfu config file, expect one in your ~/.ssh/config
 
@@ -41,4 +41,3 @@ Maybe latter I will provide some options, like re-import from ~/.ssh/config, mak
 For how it works, it's just a bunch of sed, and some m4, does the job, but don't press it too much.
 
 Bye.
-
