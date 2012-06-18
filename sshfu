@@ -93,7 +93,8 @@ host $1 dnl' \
   -D CompressionLevel='level $1 dnl' \
   -D ForwardAgent='agent $1 dnl' \
   -D Proxy='proxy $1 dnl' \
-  -D IdentityFile='i $1 dnl' | sed '/^$/d;s/ \{2,\}/ /g;s/^[^ ]\{1,\}([^ ]*).*/&\
+  -D IdentityFile='i $1 dnl' | sed \
+    '/^$/d;s/ \{2,\}/ /g;s/^[^ ]\{1,\}([^ ]*).*/&\
 /'
 }
 
@@ -140,7 +141,8 @@ grep ^host < ~/.ssh/sshfu/routes | grep gw | sed \
 comp_ssh_config() {
 umask 022
 cat ssh_config.head > ssh_config
-cat routes | sed 's/\([^() ]\{1,\}\) \([^() ]\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d'| m4 \
+cat routes | sed \
+  's/\([^() ]\{1,\}\) \([^() ]\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d'| m4 \
   -D host='Host $1
 ' -D address='HostName $1
 ' -D gw='ProxyCommand ssh $1 -W %h:%p
@@ -154,7 +156,8 @@ cat routes | sed 's/\([^() ]\{1,\}\) \([^() ]\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d'| m
 ' -D keepalive='ServerAliveInterval $1
 ' -D proxy='ProxyCommand $1 %h %p
 ' | sed 's/)/&\
-/;s@\([^ ]\{1,\}\)(\([^ ]\{1,\}\))@\1 \2@g;s/ \{2,\}/ /g' | sed 's/^ /  /' >> ssh_config
+/;s@\([^ ]\{1,\}\)(\([^ ]\{1,\}\))@\1 \2@g;s/ \{2,\}/ /g' | sed \
+  's/^ /  /' >> ssh_config
 cat ssh_config.tail >> ssh_config
 }
 
