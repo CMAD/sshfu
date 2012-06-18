@@ -126,6 +126,17 @@ EOF
 
 fi
 
+detect_cycles() {
+grep ^host < ~/.ssh/sshfu/routes | grep gw | sed \
+  's/host \([^ ]\{1,\}\).*gw \([^ ]\{1,\}\).*/\1 \2/' | awk \
+  '{if($1 == $2){print $1" uses itself as gateway" > "/dev/stderr"}
+  else {print $0}}' | tsort 2>&1 | grep 'tsort: ' | sed 's/tsort: //' 1>&2
+grep ^host < ~/.ssh/sshfu/routes | grep gw | sed \
+  's/.*address \([^ ]\{1,\}\).*gw \([^ ]\{1,\}\).*/\1 \2/' | awk \
+  '{if($1 == $2){print $1" uses itself as gateway" > "/dev/stderr"}
+  else {print $0}}' | tsort 2>&1 | grep 'tsort: ' | sed 's/tsort: //' 1>&2
+}
+
 comp_ssh_config() {
 umask 022
 cat ssh_config.head > ssh_config
@@ -149,6 +160,7 @@ cat ssh_config.tail >> ssh_config
 
 "${EDITOR-vi}" routes
 
-comp_ssh_config
+detect_cycles && comp_ssh_config
+
 cp ../config ../config~
 cp ssh_config ../config
