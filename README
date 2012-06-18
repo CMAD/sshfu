@@ -1,39 +1,44 @@
 sshfu: ~/.ssh/config manager.
 
-This script provides an alternative line-by-line syntax
-for ~/.ssh/config that is a little easier on the eyes.
+This script provides an alternative line-by-line syntax for ~/.ssh/config that is a little easier on the eyes.
 
-When you have more than two hosts on you configuration it
-get's a litte verbose for simple things, and here is where
-this syntax helps.
+When you have more than two hosts on you configuration it gets a little verbose for simple things, and here is where this syntax helps.
 
-sshfu will fire $EDITOR on ~/.ssh/sshfu/routes and when
-you exit, compile the resulting configuration along with
-~/.ssh/sshfu/ssh_config.head and ~/.ssh/sshfu/ssh_config.tail 
-into you actual ~/.ssh/config.
-
-To make things easier, the first time you run it, it will
-try to copy itself to /usr/local/bin to be on you path.
-
-Also, if you are running it from the uncompressed archive
-it will install a vim syntax highliting file, and set it up.
-
-If an allready existing ~/.ssh/config exits, it will make a
-copy on ~/.ssh/original_ssh_config, and try to import you
-configuration.
-
-It has no options, the only thing you need to do to use it
-is fire sshfu. There are commented examples on the 
-configuration file that will show up when you run it.
-
-here is what the syntax looks like:
+Here is what the syntax looks like:
 
 host server address server.test user root
 host grimalkin address 192.168.1.1 gw server user cmad
 host vm1 address 10.10.1.1 gw grimalkin
+And this what it will compile into:
 
-It shouldn't do any harm to say but, this script is 
-garbage-in garbage-out, which means, if yo put a typo
-in the sshfu config file, expect one in your ~/.ssh/config
+Host server
+  HostName server.test
+  User root
 
+Host grimalkin
+  HostName 192.168.1.1
+  ProxyCommand ssh server -W %h:%p
+  User cmad
+
+Host vm1 
+  HostName 10.10.1.1
+  ProxyCommand ssh grimalkin -W %h:%p
+
+If it finds an already existing ~/.ssh/config, it will make a copy on ~/.ssh/original_ssh_config, and try to import you configuration.
+
+Also to make things easier, the first time you run it, it will try to copy itself to /usr/local/bin to be on you path.
+
+And if you are running it from the uncompressed archive it will install a vim syntax highlighting file, and set it up.
+
+It has no options, the only thing you need to do to use it is to fire it, $ sshfu. There are commented examples on the configuration file that will show up when you run it.
+
+sshfu will fire $EDITOR on ~/.ssh/sshfu/routes and when you exit, compile the resulting configuration along with ~/.ssh/sshfu/ssh_config.head and ~/.ssh/sshfu/ssh_config.tail into you actual ~/.ssh/config.
+
+It shouldn't do any harm to say but, this script is garbage-in garbage-out, which means, if yo put a typo in the sshfu config file, expect one in your ~/.ssh/config
+
+Maybe latter I will provide some options, like re-import from ~/.ssh/config, make it more clean, etc. For the time being, it's just something I use, and hopefully it maybe of some use to you.
+
+For how it works, it's just a bunch of sed, and some m4, does the job, but don't press it too much.
+
+Bye.
 
