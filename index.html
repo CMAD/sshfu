@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Sshfu by CMAD</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Sshfu</h1>
+        <p>~./ssh/config manager</p>
+        <p class="view"><a href="https://github.com/CMAD/sshfu">View the Project on GitHub <small>CMAD/sshfu</small></a></p>
+        <ul>
+          <li><a href="https://github.com/CMAD/sshfu/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/CMAD/sshfu/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/CMAD/sshfu">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>sshfu: ~/.ssh/config manager.</h1>
+
+<p>This script provides an alternative line-by-line syntax
+for ~/.ssh/config that is a little easier on the eyes.</p>
+
+<p>When you have more than two hosts on you configuration it
+gets a little verbose for simple things, and here is where
+this syntax helps.</p>
+
+<p>Here is what the syntax looks like:</p>
+
+<pre lang="shell"><code>host server address server.test user root
+host grimalkin address 192.168.1.1 gw server user cmad
+host vm1 address 10.10.1.1 gw grimalkin
+</code></pre>
+
+<p>And this what it will compile into:</p>
+
+<pre lang="shell"><code>Host server
+  HostName server.test
+  User root
+
+Host grimalkin
+  HostName 192.168.1.1
+  ProxyCommand ssh server -W %h:%p
+  User cmad
+
+Host vm1 
+  HostName 10.10.1.1
+  ProxyCommand ssh grimalkin -W %h:%p
+</code></pre>
+
+<p>If it finds an already existing ~/.ssh/config, it will
+make a copy on ~/.ssh/original_ssh_config, and try to import 
+you configuration.</p>
+
+<p>Also to make things easier, the first time you run it, it will
+try to copy itself to /usr/local/bin to be on you path.</p>
+
+<p>And if you are running it from the uncompressed archive
+it will install a vim syntax highlighting file, and set it up.</p>
+
+<p>It has no options, the only thing you need to do to use it
+is to fire it, $ sshfu. There are commented examples on the 
+configuration file that will show up when you run it.</p>
+
+<p>sshfu will fire $EDITOR on ~/.ssh/sshfu/routes and when
+you exit, compile the resulting configuration along with
+~/.ssh/sshfu/ssh_config.head and ~/.ssh/sshfu/ssh_config.tail 
+into you actual ~/.ssh/config.</p>
+
+<p>It shouldn't do any harm to say but, this script is 
+garbage-in garbage-out, which means, if yo put a typo
+in the sshfu config file, expect one in your ~/.ssh/config</p>
+
+<p>Maybe latter I will provide some options, like re-import
+from ~/.ssh/config, make it more clean, etc. For the time
+being, it's just something I use, and hopefully it maybe
+of some use to you.</p>
+
+<p>For how it works, it's just a bunch of sed, and some 
+m4, does the job, but don't press it too much.</p>
+
+<p>Bye.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/CMAD">CMAD</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-32716828-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
