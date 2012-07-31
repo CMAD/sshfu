@@ -141,27 +141,36 @@ grep ^host < ~/.ssh/sshfu/routes | grep gw | sed \
 comp_ssh_config() {
 umask 022
 cat ssh_config.head > ssh_config
-cat routes | sed \
-  's/\([^() ]\{1,\}\) \([^() ]\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d'| m4 \
-  -D host='Host $1
-' -D address='HostName $1
-' -D gw='ProxyCommand ssh $1 -W %h:%p
-' -D user='User $1
-' -D port='Port $1
-' -D key='IdentityFile ~/.ssh/$1
-' -D i='IdentityFile $1
-' -D comp='Compression $1
-' -D level='CompressionLevel $1
-' -D agent='ForwardAgent $1
-' -D keepalive='ServerAliveInterval $1
-' -D proxy='ProxyCommand $1 %h %p
-' | sed 's/)/&\
-/;s@\([^ ]\{1,\}\)(\([^ ]\{1,\}\))@\1 \2@g;s/ \{2,\}/ /g' | sed \
-  's/^ /  /' >> ssh_config
+{
+cat <<-EOF
+proc host {hostname args} {
+  puts "Host \$hostname"
+  foreach {opt val} \$args {
+    switch -- \$opt {
+      address {puts "  HostName \$val"}
+      gw {puts "  ProxyCommand ssh \$val -W %h:%p"}
+      user {puts "  User \$val"}
+      port {puts "  Port \$val"}
+      key {puts "  IdentityFile ~/.ssh/\$val"}
+      i {puts "  IdentityFile \$val"}
+      comp {puts "  Compression \$val"}
+      level {puts "  CompressionLevel \$val"}
+      agent {puts "  ForwardAgent \$val"}
+      keepalive {puts "  ServerAliveInterval \$val"}
+      proxy {puts "  ProxyCommand \$val %h %p"}
+      default {puts "  \$opt \$val"}
+    }
+  }
+  puts ""
+}
+proc include {text} {puts \$text} 
+EOF
+cat routes
+} | tclsh >> ssh_config
 cat ssh_config.tail >> ssh_config
 }
 
-"${EDITOR-vi}" routes
+[ -n "$DONT_EDIT" ] || "${EDITOR-vi}" routes
 
 detect_cycles && comp_ssh_config
 
