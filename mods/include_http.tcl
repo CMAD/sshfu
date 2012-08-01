@@ -1,7 +1,11 @@
 package require http
-package require tls
 
-::http::register https 443 ::tls::socket
+catch {
+  # provide https support if tcl-tls installed
+  package require tls
+
+  ::http::register https 443 ::tls::socket
+}
 
 proc include_http_base64 {str} {
   if {![catch {binary encode base64 $str} res]} {
