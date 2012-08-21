@@ -34,12 +34,15 @@ namespace eval sshfu {}
 
 proc sshfu::import_ssh_config {outfd} {
   set fd [open ~/.ssh/config r]
-  set host ""
   set params [dict create]
+  set host ""
   foreach line [split [read $fd] "\n"] {
     set line [regsub {^[[:space:]]*(#.*)?} $line ""]
     if {$line eq ""} continue
     regexp {([^[:space:]]*)(?:[[:space:]]+(.*?)[[:space:]]*)?$} $line -> cmd opts
+    if {$host eq "" || [string tolower $cmd] ne "host"} {
+      dict set globalparams $cmd $opts
+    }
     switch -exact [string tolower $cmd] {
       host {
 	set host $opts
@@ -74,6 +77,13 @@ proc sshfu::import_ssh_config {outfd} {
 	dict set params $host $cmd $opts
       }
     }
+  }
+  if {[info exists globalparams]} {
+    puts $outfd "include \{"
+    foreach {key val} $globalparams {
+      puts "$key $val"
+    }
+    puts $outfd "\}"
   }
   dict for {host p} $params {
     puts $outfd "host $host [lsort -stride 2 $p]"
