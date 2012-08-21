@@ -1,178 +1,226 @@
 #!/bin/sh
-#version=1.0-beta
-#Copyright (C) 2012 Carlos Antelo
+#\
+exec tclsh "$0" "$@"
+
+# Copyright (C) 2012 netlabs: www.netlabs.com.uy
 #
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License
-#along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-if ! which m4 >> /dev/null; then 
-  echo You need m4 installed to run sshfu
-  exit 1
-fi
-
-autoinstall(){
-echo "running autoinstall..." >&2
-
-echo "trying to copy the script to /usr/local/bin using normal cp" >&2
-cp "$0" /usr/local/bin/sshfu 
-
-if [ "$?" -ne 0 ]; then
-  echo "it didn't work, trying to use sudo..." >&2 
-  sudo cp "$0" /usr/local/bin/sshfu && echo ... ok. >&2 && return 0
-else
-  echo ... ok. >&2
-  return 0
-fi
-
-echo "didn't work either, trying su" >&2
-local origin=$PWD
-su - root -c "cp $origin/$0 /usr/local/bin/sshfu" 
-
-if [ "$?" -ne 0 ]; then
-  echo "didn't work, plase install manually." >&2
-  exit 1
-fi
-
-echo ... ok. >&2
+if {[package vcompare $::tcl_version 8.5] < 0} {
+  # need tclsh 8.5 at least
+  if {![catch {exec -ignorestderr tclsh8.5 $::argv0}]} {
+    exit
+  } elseif {![catch {exec -ignorestderr tclsh8.6 $::argv0}]} {
+    exit
+  } else {
+    puts stderr "Tcl 8.5 (or newer) required!"
+    exit 1
+  }
 }
 
-vimsyntax() {
-mkdir -p ~/.vim/syntax
-cp ./misc/sshfu.vim ~/.vim/syntax
-cat <<EOF >> ~/.vimrc
-" sshfu syntax highliting (autoinstalled)
-au BufNewFile,BufRead ~/.ssh/sshfu/routes set filetype=sshfu
-EOF
-}
+namespace eval sshfu {}
 
-if [ ! -d ~/.ssh/sshfu ]; then
-
-  if ! which sshfu; then
-    autoinstall
-  fi
-
-  if [ -e ./misc/sshfu.vim ] && [ ! -e ~/.vim/syntax/sshfu.vim ]; then
-    vimsyntax
-  fi
-
-  cp ~/.ssh/config ~/.ssh/original_ssh_config 2>&1 > /dev/null
-  mkdir -p ~/.ssh/sshfu
-  touch ~/.ssh/sshfu/ssh_config.head
-  touch ~/.ssh/sshfu/ssh_config.tail
-
-fi
-
-cd ~/.ssh/sshfu
-
-import_ssh_confg() {
-sed < ~/.ssh/config \
-  -e 's/ProxyCommand ssh \([^ ]\{1,\}\).*/Gateway \1/' \
-  -e 's/ProxyCommand \([^ ]\{1,\}\).*/Proxy \1/' \
-  -e 's@IdentityFile ~/.ssh/@SSHKey@' \
-  -e 's/\([^ ]\{1,\}\) \(.\{1,\}\)/\1\(\2\)/g;/^#/d;/^$/d' | m4 \
-  -D Host='
-host $1 dnl' \
-  -D HostName='address $1 dnl' \
-  -D Gateway='gw $1 dnl' \
-  -D ServerKeepAlive='keepalive $1 dnl' \
-  -D User='user $1 dnl' \
-  -D Port='port $1 dnl' \
-  -D SSHKey='key $1 dnl' \
-  -D Compression='comp $1 dnl' \
-  -D CompressionLevel='level $1 dnl' \
-  -D ForwardAgent='agent $1 dnl' \
-  -D Proxy='proxy $1 dnl' \
-  -D IdentityFile='i $1 dnl' | sed \
-    '/^$/d;s/ \{2,\}/ /g;s/^[^ ]\{1,\}([^ ]*).*/&\
-/'
-}
-
-
-if [ ! -e routes ]; then
-cat <<EOF > routes
-# sshfu configuration file
-#
-# This file along with the contents of ssh_config.head and
-# ssh_config.tail are compiled into you ~/ssh/config
-#
-# supported keywords: host, address, gw, user, port, key, i, keepalive,
-# comp, level, agent, proxy
-#
-# host server address server.dns.test port 8
-# host laptop address 192.168.2.1 gw server key id_rsa2
-# host myvm address 10.10.1.1 gw laptop i ~/Documents/keys/myvm
-# host * user root keepalive 60 
-#
-# have fun (and don't make any mistakes unless you 
-# want to blow you head)
-# 
-
-EOF
-
-  if [ -e ~/.ssh/config ]; then
-    import_ssh_confg >> ~/.ssh/sshfu/routes 
-    echo >> ~/.ssh/sshfu/routes
-  fi
-
-fi
-
-detect_cycles() {
-grep ^host < ~/.ssh/sshfu/routes | grep gw | sed \
-  's/host \([^ ]\{1,\}\).*gw \([^ ]\{1,\}\).*/\1 \2/' | awk \
-  '{if($1 == $2){print $1" uses itself as gateway" > "/dev/stderr"}
-  else {print $0}}' | tsort 2>&1 | grep 'tsort: ' | sed 's/tsort: //' 1>&2
-grep ^host < ~/.ssh/sshfu/routes | grep gw | sed \
-  's/.*address \([^ ]\{1,\}\).*gw \([^ ]\{1,\}\).*/\1 \2/' | awk \
-  '{if($1 == $2){print $1" uses itself as gateway" > "/dev/stderr"}
-  else {print $0}}' | tsort 2>&1 | grep 'tsort: ' | sed 's/tsort: //' 1>&2
-}
-
-comp_ssh_config() {
-umask 022
-cat ssh_config.head > ssh_config
-{
-cat <<-EOF
-proc host {hostname args} {
-  puts "Host \$hostname"
-  foreach {opt val} \$args {
-    switch -- \$opt {
-      address {puts "  HostName \$val"}
-      gw {puts "  ProxyCommand ssh \$val -W %h:%p"}
-      user {puts "  User \$val"}
-      port {puts "  Port \$val"}
-      key {puts "  IdentityFile ~/.ssh/\$val"}
-      i {puts "  IdentityFile \$val"}
-      comp {puts "  Compression \$val"}
-      level {puts "  CompressionLevel \$val"}
-      agent {puts "  ForwardAgent \$val"}
-      keepalive {puts "  ServerAliveInterval \$val"}
-      proxy {puts "  ProxyCommand \$val %h %p"}
-      default {puts "  \$opt \$val"}
+proc sshfu::import_ssh_config {outfd} {
+  set fd [open ~/.ssh/config r]
+  set host ""
+  set params [dict create]
+  foreach line [split [read $fd] "\n"] {
+    set line [regsub {^[[:space:]]*(#.*)?} $line ""]
+    if {$line eq ""} continue
+    regexp {([^[:space:]]*)(?:[[:space:]]+(.*?)[[:space:]]*)?$} $line -> cmd opts
+    switch -exact [string tolower $cmd] {
+      host {
+	set host $opts
+      } hostname {
+	dict set params $host address $opts
+      } serveraliveinterval {
+	dict set params $host keepalive $opts
+      } identityfile {
+	if {[regexp {^~/.ssh/(.*)$} $opts -> part]} {
+	  dict set params $host key $part
+	} else {
+	  dict set params $host i $opts
+	}
+      } compression {
+	dict set params $host comp $opts
+      } compressionlevel {
+	dict set params $host level $opts
+      } forwardagent {
+	dict set params $host agent $opts
+      } proxycommand {
+	if {[regexp {^ssh (.*) -W %h:%p$} $opts -> gw] || \
+	    [regexp {^ssh (.*) nc %h %p$} $opts -> gw]} {
+	  dict set params $host gw $gw
+	} elseif {[regexp {^(.*) %h %p$} $opts -> pcmd]} {
+	  dict set params $host proxy $pcmd
+	} else {
+	  dict set params $host ProxyCommand $opts
+	}
+      } user - port {
+	dict set params $host [string tolower $cmd] $opts
+      } default {
+	dict set params $host $cmd $opts
+      }
     }
   }
-  puts ""
-}
-proc include {text} {puts \$text} 
-EOF
-cat routes
-} | tclsh >> ssh_config
-cat ssh_config.tail >> ssh_config
+  dict for {host p} $params {
+    puts $outfd "host $host [lsort -stride 2 $p]"
+  }
+  close $fd
 }
 
-[ -n "$DONT_EDIT" ] || "${EDITOR-vi}" routes
+proc sshfu::autodetect_config {} {
+  if {![file exists ~/.ssh/sshfu]} {
+    file mkdir ~/.ssh/sshfu
+    catch {file copy ~/.ssh/config ~/.ssh/original_ssh_config}
+    set fd [open ~/.ssh/sshfu/ssh_config.head "a"]
+    close $fd
+    set fd [open ~/.ssh/sshfu/ssh_config.tail "a"]
+    close $fd
+  }
 
-detect_cycles && comp_ssh_config
+  if {![file exists ~/.ssh/sshfu/routes]} {
+    set fd [open ~/.ssh/sshfu/routes w]
+    puts $fd [regsub -all -lineanchor {^\n *|^ *} {
+      # sshfu configuration file
+      #
+      # This file along with the contents of ssh_config.head and
+      # ssh_config.tail are compiled into you ~/ssh/config
+      #
+      # supported keywords: host, address, gw, user, port, key, i, keepalive,
+      # comp, level, agent, proxy, tags
+      #
+      # host server address server.dns.test port 8
+      # host laptop address 192.168.2.1 gw server key id_rsa2
+      # host myvm address 10.10.1.1 gw laptop i ~/Documents/keys/myvm
+      # host * user root keepalive 60 
+      #
+      # have fun (and don't make any mistakes unless you 
+      # want to blow you head)
+      # 
+    } ""]
+    if {[file readable ~/.ssh/config]} {
+      sshfu::import_ssh_config $fd
+    }
+    puts $fd ""
+    close $fd
+  }
+}
 
-cp ../config ../config~
-cp ssh_config ../config
+set sshfu::gateway_of {}
+set sshfu::default_opts {}
+
+proc host {hostname args} {
+  include "Host $hostname"
+  foreach {opt val} [lsort -stride 2 [dict merge $sshfu::default_opts $args]] {
+    switch -- $opt {
+      address	{include "  HostName $val"}
+      gw	{
+	include "  ProxyCommand ssh $val -W %h:%p"
+	dict set sshfu::gateway_of $hostname $val
+      }
+      user	{include "  User $val"}
+      port	{include "  Port $val"}
+      key	{include "  IdentityFile ~/.ssh/$val"}
+      i		{include "  IdentityFile $val"}
+      comp	{include "  Compression $val"}
+      level	{include "  CompressionLevel $val"}
+      agent	{include "  ForwardAgent $val"}
+      keepalive	{include "  ServerAliveInterval $val"}
+      proxy	{include "  ProxyCommand $val %h %p"}
+      tags	{include "  # Tags: [lsort $val]"}
+      default	{include "  $opt $val"}
+    }
+  }
+  include ""
+}
+
+proc sshfu::detect_cycles {} {
+  set avail $sshfu::gateway_of
+  set visited {}
+  dict for {host gw} $avail {break}
+  while {[dict size $avail] > 0} {
+    dict for {host gw} $avail {break}
+    while {$host ne "" && [dict exists $avail $host]} {
+      set gw [dict get $avail $host]
+      dict set visiting $host 1
+      dict unset avail $host
+      if {[dict exists $visiting $gw]} {
+	puts "Warning: loop detected on host \"$host\", visiting: $visiting"
+      }
+      set host $gw
+    }
+    set visiting {}
+  }
+}
+
+proc include {text} {
+  puts $sshfu::configfd $text
+}
+
+# syntax:
+#  inside ctx1 code1
+#  inside ctx1 or ctx2 code1
+#  inside ctx1 or ctx2 code1 ctx3 code3 otherwise code
+#  inside ctx1 {or ctxN} code1 {ctx1M {or ctxNM} codeM} otherwise code
+proc inside {args} {
+  set params {}
+  foreach {ctx code} $args {
+    if {$code eq "or"} {
+      lappend params "x$ctx" -
+    } elseif {$ctx eq "otherwise"} {
+      lappend params default $code
+    } else {
+      lappend params "x$ctx" $code
+    }
+  }
+  uplevel [list switch -exact -- $::CONTEXT $params]
+}
+
+proc with {args} {
+  if {[llength $args] % 2} {
+    set old_opts $sshfu::default_opts
+    set sshfu::default_opts [dict merge $sshfu::default_opts [lrange $args 0 end-1]]
+    uplevel [lindex $args end]
+    set sshfu::default_opts $old_opts
+  } else {
+    set sshfu::default_opts [dict merge $sshfu::default_opts $args]
+  }
+}
+
+if {![info exists env(DONT_RUN)]} {
+  sshfu::autodetect_config
+
+  if {![info exists env(DONT_EDIT)]} {
+    if {[info exists env(EDITOR)]} {
+      exec $env(EDITOR) [file normalize ~/.ssh/sshfu/routes] >@stdout
+    } else {
+      exec vi [file normalize ~/.ssh/sshfu/routes] >@stdout
+    }
+  }
+
+  file copy -force ~/.ssh/config ~/.ssh/config~
+  set sshfu::configfd [open ~/.ssh/config "w"]
+  if {![catch {open ~/.ssh/sshfu/ssh_config.head} fd]} {
+    fcopy $fd $sshfu::configfd
+  }
+  source ~/.ssh/sshfu/routes
+  if {![catch {open ~/.ssh/sshfu/ssh_config.tail} fd]} {
+    fcopy $fd $sshfu::configfd
+  }
+  close $sshfu::configfd
+
+  sshfu::detect_cycles
+}
