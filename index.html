@@ -17,7 +17,10 @@
       <header>
         <h1>Sshfu</h1>
         <p>~./ssh/config manager</p>
+
         <p class="view"><a href="https://github.com/CMAD/sshfu">View the Project on GitHub <small>CMAD/sshfu</small></a></p>
+
+
         <ul>
           <li><a href="https://github.com/CMAD/sshfu/zipball/master">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/CMAD/sshfu/tarball/master">Download <strong>TAR Ball</strong></a></li>
@@ -25,25 +28,22 @@
         </ul>
       </header>
       <section>
-        <h1>sshfu: ~/.ssh/config manager.</h1>
+        <p>sshfu: ~/.ssh/config manager.</p>
 
-<p>This script provides an alternative line-by-line syntax
-for ~/.ssh/config that is a little easier on the eyes.</p>
+<p>This script provides an alternative line-by-line syntax for ~/.ssh/config that is a little easier on the eyes.</p>
 
-<p>When you have more than two hosts on you configuration it
-gets a little verbose for simple things, and here is where
-this syntax helps.</p>
+<p>When you have more than two hosts on you configuration it gets a little verbose for simple things, and here is where this syntax helps.</p>
 
 <p>This is what the syntax looks like:</p>
 
-<pre lang="shell"><code>host server address server.test user root
+<div class="highlight"><pre>host server address server.test user root
 host grimalkin address 192.168.1.1 gw server user cmad
 host vm1 address 10.10.1.1 gw grimalkin
-</code></pre>
+</pre></div>
 
 <p>And this what it will compile into:</p>
 
-<pre lang="shell"><code>Host server
+<div class="highlight"><pre>Host server
   HostName server.test
   User root
 
@@ -55,38 +55,18 @@ Host grimalkin
 Host vm1 
   HostName 10.10.1.1
   ProxyCommand ssh grimalkin -W %h:%p
-</code></pre>
+</pre></div>
 
-<p>If it finds an already existing ~/.ssh/config, it will
-make a copy on ~/.ssh/original_ssh_config, and try to import 
-your configuration.</p>
+<p>If it finds an already existing ~/.ssh/config, it will make a copy on ~/.ssh/original_ssh_config, and try to import your configuration.</p>
 
-<p>Also to make things easier, the first time you run it, it will
-try to copy itself to /usr/local/bin to be on your path.</p>
+<p>sshfu will fire $EDITOR on ~/.ssh/sshfu/routes and when you exit, compile the resulting configuration along with ~/.ssh/sshfu/ssh_config.head and ~/.ssh/sshfu/ssh_config.tail into your actual ~/.ssh/config.</p>
 
-<p>And if you are running it from the uncompressed archive
-it will install a vim syntax highlighting file, and set it up.</p>
+<p>It shouldn't do any harm to say but, this script is garbage-in garbage-out, which means, if yo put a typo in the sshfu config file, expect one in your ~/.ssh/config</p>
 
-<p>It has no options, the only thing you need to do to use it
-is to fire it, $ sshfu. There are commented examples on the 
-configuration file that will show up when you run it.</p>
+<p>Maybe latter I will provide some options, like re-import from ~/.ssh/config, make it more clean, etc. For the time being, it's just something I use, and hopefully it maybe of some use to you.</p>
 
-<p>sshfu will fire $EDITOR on ~/.ssh/sshfu/routes and when
-you exit, compile the resulting configuration along with
-~/.ssh/sshfu/ssh_config.head and ~/.ssh/sshfu/ssh_config.tail 
-into your actual ~/.ssh/config.</p>
-
-<p>It shouldn't do any harm to say but, this script is 
-garbage-in garbage-out, which means, if yo put a typo
-in the sshfu config file, expect one in your ~/.ssh/config</p>
-
-<p>Maybe latter I will provide some options, like re-import
-from ~/.ssh/config, make it more clean, etc. For the time
-being, it's just something I use, and hopefully it maybe
-of some use to you.</p>
-
-<p>For how it works, it's just a bunch of sed, and some 
-m4, does the job, but don't press it too much.</p>
+<p>EDIT: Some of us are actually using it at work, and now is a tcl script, also we are using it to dinamically
+choose gateway if for example we are at home and need to reach a server. It can also detect cycles.</p>
 
 <p>Bye.</p>
       </section>
