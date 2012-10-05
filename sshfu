@@ -30,6 +30,18 @@ if {[package vcompare $::tcl_version 8.5] < 0} {
   }
 }
 
+proc dict_sort {dict} {
+  if {[package vcompare $::tcl_version 8.6] < 0} {
+    set res {}
+    foreach key [lsort [dict keys $dict]] {
+      lappend res $key [dict get $dict $key]
+    }
+    return $res
+  } else {
+    return [lsort -stride 2 $dict]
+  }
+}
+
 namespace eval sshfu {}
 
 proc sshfu::import_ssh_config {outfd} {
@@ -86,7 +98,7 @@ proc sshfu::import_ssh_config {outfd} {
     puts $outfd "\}"
   }
   dict for {host p} $params {
-    puts $outfd "host $host [lsort -stride 2 $p]"
+    puts $outfd "host $host [dict_sort $p]"
   }
   close $fd
 }
@@ -134,7 +146,7 @@ set sshfu::default_opts {}
 
 proc host {hostname args} {
   include "Host $hostname"
-  foreach {opt val} [lsort -stride 2 [dict merge $sshfu::default_opts $args]] {
+  foreach {opt val} [dict_sort [dict merge $sshfu::default_opts $args]] {
     switch -- $opt {
       address	{include "  HostName $val"}
       gw	{
