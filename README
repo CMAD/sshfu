@@ -36,12 +36,13 @@ Maybe latter I will provide some options, like re-import from ~/.ssh/config, mak
 EDIT: Some of us are actually using it at work, and now is a tcl script, also we are using it to dinamically
 choose gateway if for example we are at home and need to reach a server. It can also detect cycles.
 
-EDIT2: Now you can use inside foo or bar otherwise blah, inside matches ageinst a CONTEXT variable
-and you can put tags, so that you can parse the sshfu routes as documentation
+EDIT2: Now you can have inside or othwrwise and with keywords, inside matches ageinst a CONTEXT variable
+and is usefull for changing gateways or projects for example, with "with" you can apply defaults to a block,
+and you can put tags, so that you can parse the sshfu routes as documentation, or group them for diagrams.
 
 inside home or public {
   with gw office_firewall {
-    host foo address 192.168.5.4 gw office_firewall
+    host foo address 192.168.5.4
     bla bla bla
   }
 } otherwise {
