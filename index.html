@@ -32,9 +32,11 @@
 
 <p>This script provides an alternative line-by-line syntax for ~/.ssh/config that is a little easier on the eyes.</p>
 
-<p>When you have more than two hosts on you configuration it gets a little verbose for simple things, and here is where this syntax helps.</p>
+<p>When you have more than two hosts on you configuration it gets a little verbose for simple things, and here is where this syntax helps. </p>
 
-<p>This is what the syntax looks like:</p>
+<p>You can too, specify a context (for dynamically switching gateways for example, if you are at home or at the office) using inside blocks, and set defaults using with blocks. Make includes, and so forth.</p>
+
+<p>This is what a simple example looks like:</p>
 
 <div class="highlight"><pre>host server address server.test user root
 host grimalkin address 192.168.1.1 gw server user cmad
@@ -67,6 +69,24 @@ Host vm1
 
 <p>EDIT: Some of us are actually using it at work, and now is a tcl script, also we are using it to dinamically
 choose gateway if for example we are at home and need to reach a server. It can also detect cycles.</p>
+
+<p>EDIT2: Now you can have inside, or, otherwise and 'with' keywords, inside matches against a 
+CONTEXT variable, which is usefull for changing gateways or projects for example, with 'with' you can apply defaults to a block, and you can put tags, so that you can parse the sshfu routes as documentation, or group them for diagrams.</p>
+
+<div class="highlight"><pre>inside home or public <span class="o">{</span>
+  with gw office_firewall <span class="o">{</span>
+    host foo address 192.168.5.4
+    bla bla bla
+  <span class="o">}</span>
+<span class="o">}</span> otherwise <span class="o">{</span>
+  host foo address 192.168.5.4 tag webserver
+  bla bla bla
+
+  with tag blah blah<span class="o">{</span>
+    blah blah blah
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
 
 <p>Bye.</p>
       </section>
