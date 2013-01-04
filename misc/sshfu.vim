@@ -21,7 +21,7 @@ syn keyword sshfuKeyword level
 syn keyword sshfuKeyword agent
 syn keyword sshfuKeyword proxy
 
-syn match sshfuComment "^#.*$" contains=sshfuTodo
+syn match sshfuComment "^\s*#.*$" contains=sshfuTodo
 syn keyword sshfuTodo TODO FIXME contained
 
 hi def link sshfuKeyword Keyword
