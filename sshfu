@@ -98,7 +98,7 @@ proc sshfu::import_ssh_config {outfd} {
     puts $outfd "\}"
   }
   dict for {host p} $params {
-    puts $outfd "host $host [dict_sort $p]"
+    puts $outfd "host [list $host] [dict_sort $p]"
   }
   close $fd
 }
@@ -143,9 +143,12 @@ proc sshfu::autodetect_config {} {
 
 set sshfu::gateway_of {}
 set sshfu::default_opts {}
+set sshfu::host_map {}
 
 proc host {hostname args} {
   include "Host $hostname"
+  set oldargs [expr {[dict exists $sshfu::host_map $hostname] ? [dict get $sshfu::host_map $hostname] : {}}]
+  dict set sshfu::host_map $hostname [dict merge $sshfu::default_opts $oldargs $args]
   foreach {opt val} [dict_sort [dict merge $sshfu::default_opts $args]] {
     switch -- $opt {
       address	{include "  HostName $val"}
