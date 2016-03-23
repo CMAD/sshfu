@@ -29,6 +29,8 @@ Host vm1
   ProxyCommand ssh grimalkin -W %h:%p
 ```
 
+More examples: [here!](docs/basic_examples.md).
+
 If it finds an already existing ~/.ssh/config, it will make a copy on ~/.ssh/original_ssh_config, and try to import your configuration.
 
 sshfu will fire $EDITOR on ~/.ssh/sshfu/routes and when you exit, compile the resulting configuration along with ~/.ssh/sshfu/ssh_config.head and ~/.ssh/sshfu/ssh_config.tail into your actual ~/.ssh/config.
