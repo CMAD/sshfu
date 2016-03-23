@@ -80,8 +80,8 @@ The owner of server1 told us that on Mondays we should go to that company, and w
            |  | |
            |  | +------------+
  +---------+  +--+           |
- |[the other     |           |
- | weekdays]     |...fqdn    |192.51.100.42
+ |[other days    |           |
+ | of theweek]   |...fqdn    |192.51.100.42
 +----------+  +-------+  +-------+
 |mycomputer|  |server1|  |server2|
 +----------+  +-------+  +-------+
@@ -93,9 +93,9 @@ The owner of server1 told us that on Mondays we should go to that company, and w
             +----+ +----+   +--+
 ```
 
-To do this we may want to have automatic CONTEXT detection based on parameters like the default gateways or the assigned addresses. Or maybe we want that the CONTEXT to vary according to the weekday. [This tutorial](context.md) may help.
+To do this we may want to have automatic CONTEXT detection based on parameters like the default gateways or the assigned addresses. Or maybe we want that the CONTEXT to vary according to the day of the week. [This tutorial](context.md) may help.
 
-Once CONTEXT is determined we can advance with the configuration, now dependant on that variable:
+Once CONTEXT is determined (CONTEXT being server1 or i.e. home) we can advance with the configuration, now dependant on that variable:
 
 ```tcl
 with key foo_rsa {
