@@ -1,17 +1,20 @@
-sshfu: ~/.ssh/config manager.
+# sshfu: ~/.ssh/config manager.
 
-This script provides an alternative line-by-line syntax for ~/.ssh/config that is a little easier on the eyes.
+This Tcl script provides an alternative line-by-line syntax for ~/.ssh/config that is a little easier on the eyes.
 
 When you have more than two hosts on you configuration it gets a little verbose for simple things, and here is where this syntax helps.
 
 This is what the syntax looks like:
 
+```tcl
 host server address server.test user root
 host grimalkin address 192.168.1.1 gw server user cmad
 host vm1 address 10.10.1.1 gw grimalkin
+```
 
 And this what it will compile into:
 
+```
 Host server
   HostName server.test
   User root
@@ -24,6 +27,9 @@ Host grimalkin
 Host vm1 
   HostName 10.10.1.1
   ProxyCommand ssh grimalkin -W %h:%p
+```
+
+More examples: [here!](docs/basic_examples.md).
 
 If it finds an already existing ~/.ssh/config, it will make a copy on ~/.ssh/original_ssh_config, and try to import your configuration.
 
@@ -33,13 +39,11 @@ It shouldn't do any harm to say but, this script is garbage-in garbage-out, whic
 
 Maybe latter I will provide some options, like re-import from ~/.ssh/config, make it more clean, etc. For the time being, it's just something I use, and hopefully it maybe of some use to you.
 
-EDIT: Some of us are actually using it at work, and now is a tcl script, also we are using it to dinamically
-choose gateway if for example we are at home and need to reach a server. It can also detect cycles.
+An important feature, in other words a side effect of using a programming language for the configuration, is that we can dinamically choose the parameters of the hosts (like the gw) depending on external information. For example using an additional gw when we are at home to reach a remote server. More info [here](docs/context.md). It can also detect infinite loop cycles.
 
-EDIT2: Now you can have inside, or, otherwise and 'with' keywords, inside matches against a CONTEXT variable
-and is usefull for changing gateways or projects for example, with 'with' you can apply defaults to a block,
-and you can put tags, so that you can parse the sshfu routes as documentation, or group them for diagrams.
+Besides any other normal Tcl command, this script provides the `inside` and `with` commands, inside matches against a CONTEXT variable and is usefull for changing gateways or projects for example, with 'with' you can apply defaults to a block, and you can put tags, so that you can parse the sshfu routes as documentation, or group them for diagrams.
 
+```tcl
 inside home or public {
   with gw office_firewall {
     host foo address 192.168.5.4
@@ -49,9 +53,10 @@ inside home or public {
   host foo address 192.168.5.4 tag webserver
   bla bla bla
 
-  with tag blah blah{
+  with tags {blah blah} {
     blah blah blah
   }
 }
+```
 
 Bye.
