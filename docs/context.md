@@ -1,10 +1,10 @@
-# CONTEXT detection in linux.
+# CONTEXT detection.
 
-This is a short tutorial explaining how to create a get_context.tcl file that after querying some files is able to gather enough information to determine whether you are for instance on your home, connected to your work's wifi or using a VPN.
+This is a short tutorial explaining how to create a get_context.tcl; file that after gather some external information is able to determine whether you are for instance on your home, connected to your work's wifi or using a VPN; setting CONTEXT accordingly.
 
 After presenting a few basic common tools, we will connect them to create the particular configuration suited to each and everyone of us.
 
-Remember that sshfu config files are just Tcl scripts with added functionality. In this document we will use `if`/`elseif`/`else` and comparisons extensivelly, so you may glance at this [Tcl tutorial](https://www.tcl.tk/man/tcl8.5/tutorial/tcltutorial.html) for some basic additional information.
+Remember that sshfu config files are just Tcl scripts with added functionality. In this document we will use `if`/`elseif`/`else` and comparisons extensively, so you may glance at this [Tcl tutorial](https://www.tcl.tk/man/tcl8.5/tutorial/tcltutorial.html) before continuing for some basic additional information.
 
 ## Tool 1: Reading a file.
 
@@ -107,6 +107,14 @@ if {[catch {exec ip route show 2>/dev/null} res]} {
   puts "there's no default gateway... disconnected from IPv4 internet?"
 }
 ```
+
+## Tool 5: Querying the Windows' registry.
+
+Only available on Microsoft Windows, is the [registry](https://www.tcl.tk/man/tcl8.0/TclCmd/registry.htm) command that can be used for a plethora of usages, like the following.
+
+if {[registry get "HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\{4B4929AF-62C1-358F-BEF0-68B9B3EE49E3}" DhcpIPAddress] eq "10.71.1.43"} {
+  puts "this not-tested test probably shows us that the interface 4B4929AF-62C1-358F-BEF0-68B9B3EE49E3 has obtained the ip address 10.71.1.43 via DHCP"
+}
 
 ## Putting it all together.
 
