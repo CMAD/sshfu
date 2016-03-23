@@ -94,7 +94,7 @@ Here we will use the tricky Tcl's `exec` command for this. Since this command th
 * Using `catch` to capture errors. If the exec command works, then its output to stdout is kept into `res`.
 
 ```tcl
-set env(LANG) C
+set env(LANG) C; # sort of localization disabling.
 
 if {[catch {exec ip route show 2>/dev/null} res]} {
   # failed:
