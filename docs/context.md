@@ -65,7 +65,27 @@ if {[grepcontent [readfile "/proc/net/if_inet6"] {^2001129102790000caf733fffe80e
 }
 ```
 
-## Tool 3: Running a command.
+## Tool 3: Checking default IPv4 gw on linux.
+
+With these tools we can begin building other higher level ones like, for instance, a function that returns true if the current default gateway is the specified one in the specified regex of interfaces.
+
+```tcl
+proc is_default_ipv4_gw {iface_regex gw} {
+  set octets [split $gw "."]
+  set hexgw [format {%4$02X%3$02X%2$02X%1$02X} {*}$octets]
+  grepcontent [readfile /proc/net/route] "^($iface_regex)\t00000000\t$hexgw"
+}
+```
+
+that may be used something like this:
+
+```tcl
+if {[is_default_ipv4_gw {eth0|eth1|wlan0} 10.71.1.51]} {
+  puts "yes, the default gw is 10.71.1.51 and it's on eth0, eth1 or wlan0"
+}
+```
+
+## Tool 4: Running a command.
 
 Another commonly used tool, although not as fast as reading a file, is to execute an external command. Also beware that the output of those tools sometimes change between different operating systems, or even different versions of the same OS. They also change according to the locale: so better **be careful**.
 
@@ -123,7 +143,9 @@ if {[grepfile "/proc/net/if_inet6" {^2001129102790000caf733fffe80e01c.*wlan0}]} 
 }
 ```
 
-Finally just source that file by adding the following line before any host definition on the sshfu main configuration:
+Be creative! Adapt these tools to your liking!
+
+Finally, just source that file by adding the following line before any host definition on the sshfu main configuration:
 
 ```tcl
 source ~/.ssh/sshfu/get_context.tcl
