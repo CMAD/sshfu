@@ -112,9 +112,11 @@ if {[catch {exec ip route show 2>/dev/null} res]} {
 
 Only available on Microsoft Windows, is the [registry](https://www.tcl.tk/man/tcl8.0/TclCmd/registry.htm) command that can be used for a plethora of usages, like the following.
 
+```tcl
 if {[registry get "HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\{4B4929AF-62C1-358F-BEF0-68B9B3EE49E3}" DhcpIPAddress] eq "10.71.1.43"} {
   puts "this not-tested test probably shows us that the interface 4B4929AF-62C1-358F-BEF0-68B9B3EE49E3 has obtained the ip address 10.71.1.43 via DHCP"
 }
+```
 
 ## Putting it all together.
 
