@@ -41,7 +41,7 @@ Now the've told us that server1 is a balancer, and in fact it's connected to two
 +----------+  +-------+  +-------+
                 |10.3.2.1    |10.0.0.33
                (switch)      |
-             .101|   |.102   |10.0.0.42
+            .101|   |.102    |10.0.0.42
             +----+ +----+   +--+
             |web1| |web2|   |db|
             +----+ +----+   +--+
@@ -87,7 +87,7 @@ The owner of server1 told us that on Mondays we should go to that company, and w
 +----------+  +-------+  +-------+
   |[mondays]    |10.3.2.1    |10.0.0.33
   +------------(switch)      |
-             .101|   |.102   |10.0.0.42
+            .101|   |.102    |10.0.0.42
             +----+ +----+   +--+
             |web1| |web2|   |db|
             +----+ +----+   +--+
