@@ -167,6 +167,12 @@ if {[grepfile "/proc/net/if_inet6" {^2001129102790000caf733fffe80e01c.*wlan0}]} 
 
 Be creative! Adapt these tools to your liking!
 
+Then, just source `get_context.tcl` by adding the following line before any host definition on the sshfu main configuration:
+
+```tcl
+source ~/.ssh/sshfu/get_context.tcl
+```
+
 ## Auto-update.
 
 Remember that the `.ssh/config` file will only be generated when we update the configuration running the `sshfu` script. That's why it's also important to automatically run this script with the DONT_EDIT variable set when a pertinent change happens, for instance via crontab if CONTEXT depends on the date/time and via if-up.d (on debian based systems) if it depends on the network state.
@@ -192,12 +198,6 @@ fi
 if [ "$2" = up -o "$2" = vpn-up ]; then
   su - myuser -c 'DONT_EDIT=1 ~/bin/sshfu'
 fi
-```
-
-Finally, just source `get_context.tcl` by adding the following line before any host definition on the sshfu main configuration:
-
-```tcl
-source ~/.ssh/sshfu/get_context.tcl
 ```
 
 Presto!
