@@ -108,7 +108,17 @@ if {[catch {exec ip route show 2>/dev/null} res]} {
 }
 ```
 
-## Tool 5: Querying the Windows' registry.
+## Tool 5: Days of the week.
+
+Why not? Maybe we want a different configuration for weekdays and another for weekends:
+
+```tcl
+if {[clock format [clock seconds] -format %a] in {Sat Sun}} {
+  puts "Weekend!!!"
+}
+```
+
+## Tool 6: Querying the Windows' registry.
 
 Only available on Microsoft Windows, is the [registry](https://www.tcl.tk/man/tcl8.0/TclCmd/registry.htm) command that can be used for a plethora of usages, like the following.
 
@@ -157,7 +167,34 @@ if {[grepfile "/proc/net/if_inet6" {^2001129102790000caf733fffe80e01c.*wlan0}]} 
 
 Be creative! Adapt these tools to your liking!
 
-Finally, just source that file by adding the following line before any host definition on the sshfu main configuration:
+## Auto-update.
+
+Remember that the `.ssh/config` file will only be generated when we update the configuration running the `sshfu` script. That's why it's also important to automatically run this script with the DONT_EDIT variable set when a pertinent change happens, for instance via crontab if CONTEXT depends on the date/time and via if-up.d (on debian based systems) if it depends on the network state.
+
+A simple way to do this on Debian based systems is to add a `/etc/network/if-up.d/sshfu` file with:
+
+```bash
+#!/bin/sh
+
+su - myuser -c 'DONT_EDIT=1 ~/bin/sshfu'
+```
+
+Or on systems running NetworkManager in general by adding a `/etc/NetworkManager/dispatcher.d/02sshfu` with:
+
+```bash
+#!/bin/sh
+
+if [ -z "$1" ]; then
+  echo "$0: called with no interface" 1>&2
+  exit 1;
+fi
+
+if [ "$2" = up -o "$2" = vpn-up ]; then
+  su - myuser -c 'DONT_EDIT=1 ~/bin/sshfu'
+fi
+```
+
+Finally, just source `get_context.tcl` by adding the following line before any host definition on the sshfu main configuration:
 
 ```tcl
 source ~/.ssh/sshfu/get_context.tcl
